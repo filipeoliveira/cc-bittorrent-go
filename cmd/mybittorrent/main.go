@@ -1,8 +1,7 @@
 package main
 
 import (
-	// Uncomment this line to pass the first stage
-	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -10,9 +9,6 @@ import (
 	// bencode "github.com/jackpal/bencode-go" // Available if you need it!
 )
 
-// Example:
-// - 5:hello -> hello
-// - 10:hello12345 -> hello12345
 func decodeBencode(bencodedString string) (interface{}, error) {
 	if unicode.IsDigit(rune(bencodedString[0])) {
 		var firstColonIndex int
@@ -26,7 +22,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 
 		lengthStr := bencodedString[:firstColonIndex]
 
-		length, err := strconv.Atoi(lengthStr)
+		length, err := strconv.Atoi(lengthStr) // string to int.
 		if err != nil {
 			return "", err
 		}
@@ -38,24 +34,23 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 }
 
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
-
 	command := os.Args[1]
 
 	if command == "decode" {
-		// Uncomment this block to pass the first stage
-		//
-		// bencodedValue := os.Args[2]
-		//
-		// decoded, err := decodeBencode(bencodedValue)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return
-		// }
-		//
-		// jsonOutput, _ := json.Marshal(decoded)
-		// fmt.Println(string(jsonOutput))
+		bencodedValue := os.Args[2]
+
+		fmt.Println("Decoding bencode string: " + bencodedValue)
+		decoded, err := decodeBencode(bencodedValue)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// marshal ?
+		fmt.Println("Marshal json: ")
+		jsonOutput, _ := json.Marshal(decoded)
+		fmt.Println(string(jsonOutput))
 	} else {
 		fmt.Println("Unknown command: " + command)
 		os.Exit(1)
