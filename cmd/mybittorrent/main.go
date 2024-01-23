@@ -10,6 +10,22 @@ import (
 )
 
 func decodeBencode(bencodedString string) (interface{}, error) {
+
+	lastPos := len(bencodedString) - 1
+
+	if rune(bencodedString[0]) == 'i' && rune(bencodedString[lastPos]) == 'e' {
+
+		endIndex := lastPos
+		numberStr := bencodedString[1:endIndex]
+
+		valid, err := strconv.Atoi(numberStr) // checking if numberStr is a valid integer
+		if err != nil {
+			return "", fmt.Errorf("invalid integer: %v", err)
+		}
+
+		return valid, nil
+	}
+
 	if unicode.IsDigit(rune(bencodedString[0])) {
 		var firstColonIndex int
 
@@ -19,7 +35,6 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 				break
 			}
 		}
-
 		lengthStr := bencodedString[:firstColonIndex]
 
 		length, err := strconv.Atoi(lengthStr) // string to int.
@@ -29,7 +44,7 @@ func decodeBencode(bencodedString string) (interface{}, error) {
 
 		return bencodedString[firstColonIndex+1 : firstColonIndex+1+length], nil
 	} else {
-		return "", fmt.Errorf("Only strings are supported at the moment")
+		return "", fmt.Errorf("only strings are supported at the moment")
 	}
 }
 
