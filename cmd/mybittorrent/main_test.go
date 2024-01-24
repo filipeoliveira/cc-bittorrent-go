@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/codecrafters-io/bittorrent-starter-go/cmd/mybittorrent/decode"
 )
 
 func TestDecode(t *testing.T) {
@@ -18,10 +20,13 @@ func TestDecode(t *testing.T) {
 		{"llleee", []interface{}{[]interface{}{[]interface{}{}}}},
 		{"le", []interface{}{}},
 		{"l6:bananai335ee", []interface{}{"banana", 335}},
+		{"d3:foo3:bar5:helloi52ee", map[string]interface{}{"foo": "bar", "hello": 52}},
+		{"de", map[string]interface{}{}},
+		{"di44e3:bar5:helloi52ee", map[string]interface{}{"44": "bar", "hello": 52}},
 	}
 
 	for _, tc := range testCases {
-		result, _, err := decode(tc.str)
+		result, _, err := decode.Debencode(tc.str)
 		if err != nil {
 			t.Fatalf("decode(%q) returned error: %s", tc.str, err)
 		}

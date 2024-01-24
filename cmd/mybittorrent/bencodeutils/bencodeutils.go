@@ -9,12 +9,16 @@ func IsInteger(str string, i int) bool {
 	return str[i] == 'i'
 }
 
+func IsString(str string, i int) bool {
+	return unicode.IsDigit(rune(str[i]))
+}
+
 func IsList(str string, i int) bool {
 	return str[i] == 'l'
 }
 
-func IsString(str string, i int) bool {
-	return unicode.IsDigit(rune(str[i]))
+func IsDict(str string, i int) bool {
+	return str[i] == 'd'
 }
 
 func parseIntegerFromChars(str string, start int) (int, int, error) {
