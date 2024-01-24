@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -23,6 +26,16 @@ func TestDecode(t *testing.T) {
 		{"d3:foo3:bar5:helloi52ee", map[string]interface{}{"foo": "bar", "hello": 52}},
 		{"de", map[string]interface{}{}},
 		{"di44e3:bar5:helloi52ee", map[string]interface{}{"44": "bar", "hello": 52}},
+		{
+			"d8:announce40:http://torrent.example.com:6969/announce4:infod6:lengthi12345e4:name8:file.txtee",
+			map[string]interface{}{
+				"announce": "http://torrent.example.com:6969/announce",
+				"info": map[string]interface{}{
+					"length": 12345,
+					"name":   "file.txt",
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -34,4 +47,60 @@ func TestDecode(t *testing.T) {
 			t.Errorf("decode(%q) = %v, want %v", tc.str, result, tc.expected)
 		}
 	}
+}
+
+func TestPrintTrackerURL(t *testing.T) {
+	bencodedString := "d8:announce40:http://torrent.example.com:6969/announce4:infod6:lengthi12345e4:name8:file.txtee"
+
+	// Redirect standard output to a buffer
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	// Call the function that prints the tracker URL
+	decoded, _, err := decode.Debencode(bencodedString)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	decodedMap, ok := decoded.(map[string]interface{})
+	if !ok {
+		t.Fatal("Decoded value is not a map")
+	}
+
+	announce, exists := decodedMap["announce"]
+	if !exists {
+		t.Fatal("Property 'announce' does not exist")
+	}
+
+	fmt.Println("Tracker URL:", announce)
+
+	info, ok := decodedMap["info"].(map[string]interface{})
+	if !ok {
+		fmt.Println("Property 'info' is not a map")
+		return
+	}
+
+	length, exists := info["length"]
+	if !exists {
+		fmt.Println("Property 'length' does not exist")
+		return
+	}
+
+	fmt.Println("Length:", length)
+
+	// Stop redirecting standard output
+	w.Close()
+	os.Stdout = oldStdout
+
+	// Read the buffer's content
+	var buf bytes.Buffer
+	buf.ReadFrom(r)
+
+	// Check if the output is as expected
+	expectedOutput := "Tracker URL: http://torrent.example.com:6969/announce\nLength: 12345\n"
+	if buf.String() != expectedOutput {
+		t.Errorf("Expected output %q, but got %q", expectedOutput, buf.String())
+	}
+
 }
