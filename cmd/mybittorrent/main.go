@@ -6,46 +6,57 @@ import (
 	"os"
 	"strconv"
 	"unicode"
-	// bencode "github.com/jackpal/bencode-go" // Available if you need it!
+
+	"github.com/codecrafters-io/bittorrent-starter-go/cmd/mybittorrent/decode"
 )
 
-func decodeBencode(bencodedString string) (interface{}, error) {
-
-	lastPos := len(bencodedString) - 1
-
-	if rune(bencodedString[0]) == 'i' && rune(bencodedString[lastPos]) == 'e' {
-
-		endIndex := lastPos
-		numberStr := bencodedString[1:endIndex]
-
-		valid, err := strconv.Atoi(numberStr) // checking if numberStr is a valid integer
-		if err != nil {
-			return "", fmt.Errorf("invalid integer: %v", err)
-		}
-
-		return valid, nil
+func parseLists(str string) (interface{}, error) {
+	m := map[string]string{
+		"i": "e",
+		"l": "e",
 	}
 
-	if unicode.IsDigit(rune(bencodedString[0])) {
-		var firstColonIndex int
+	stack := make([]string, 0)
+	curr := ""
 
-		for i := 0; i < len(bencodedString); i++ {
-			if bencodedString[i] == ':' {
-				firstColonIndex = i
-				break
+	for i := 0; i < len(str); i++ {
+		char := str[i]
+		if complement, ok := m[string(char)]; ok {
+			stack = append(stack, complement)
+			curr += string(char)
+		} else if unicode.IsDigit(rune(char)) {
+			for i < len(str) && unicode.IsDigit(rune(str[i])) {
+				curr += string(str[i])
+				i++
 			}
+			stack = append(stack, curr)
+			curr = ""
+		} else {
+			return nil, fmt.Errorf("unexpected character: %c", char)
 		}
-		lengthStr := bencodedString[:firstColonIndex]
-
-		length, err := strconv.Atoi(lengthStr) // string to int.
-		if err != nil {
-			return "", err
-		}
-
-		return bencodedString[firstColonIndex+1 : firstColonIndex+1+length], nil
-	} else {
-		return "", fmt.Errorf("only strings are supported at the moment")
 	}
+
+	if curr != "" {
+		stack = append(stack, curr)
+	}
+
+	return stack, nil
+}
+
+func decodeInt(str string) (int, int, error) {
+	start := 0
+	endNumberPos := start + 1
+	for str[endNumberPos] != 'e' {
+		endNumberPos++
+	}
+
+	numString := str[start:endNumberPos]
+	num, err := strconv.Atoi(numString)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return num, endNumberPos + 1, nil
 }
 
 func main() {
@@ -54,13 +65,12 @@ func main() {
 	if command == "decode" {
 		bencodedValue := os.Args[2]
 
-		decoded, err := decodeBencode(bencodedValue)
+		decoded, _, err := decode.Debencode(bencodedValue)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		// marshal ?
 		jsonOutput, _ := json.Marshal(decoded)
 		fmt.Println(string(jsonOutput))
 	} else {
