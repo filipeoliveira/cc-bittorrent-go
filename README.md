@@ -11,26 +11,19 @@ Protocol, pipelining and more.
 **Note**: If you're viewing this repo on GitHub, head over to
 [codecrafters.io](https://codecrafters.io) to try the challenge.
 
-# Passing the first stage
+# Steps
 
-The entry point for your BitTorrent implementation is in
-`cmd/mybittorrent/main.go`. Study and uncomment the relevant code, and push your
-changes to pass the first stage:
+- Decode bencoded strings
+- Decode bencoded integers
+- Decode bencoded lists
+- Decode bencoded dictionaries
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
+- Parse torrent file
+- Calculate info has
+- Piece hashes
 
-Time to move on to the next stage!
+- Discover peers
+- Peer handshake
 
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `go (1.19)` installed locally
-1. Run `./your_bittorrent.sh` to run your program, which is implemented in
-   `cmd/mybittorrent/main.go`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+- Download a piece
+- Download the whole file
