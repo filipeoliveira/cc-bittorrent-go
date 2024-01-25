@@ -89,8 +89,14 @@ func parseDecodedTorrent(decoded interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Pieces:", pieces)
 
+	const pieceSizeInBytes = 20
+	chunks := utils.SplitIntoChunks(string(pieces), pieceSizeInBytes)
+	hexStrings := utils.ConvertToHexStrings(chunks)
+
+	for _, hexString := range hexStrings {
+		fmt.Println(hexString)
+	}
 	return nil
 }
 
