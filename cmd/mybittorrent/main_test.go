@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
@@ -49,63 +46,6 @@ func TestDecode(t *testing.T) {
 		}
 	}
 }
-
-func TestPrintTrackerURL(t *testing.T) {
-	bencodedString := "d8:announce40:http://torrent.example.com:6969/announce4:infod6:lengthi12345e4:name8:file.txtee"
-
-	// Redirect standard output to a buffer
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	// Call the function that prints the tracker URL
-	decoded, _, err := decode.Debencode(bencodedString)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	decodedMap, ok := decoded.(map[string]interface{})
-	if !ok {
-		t.Fatal("Decoded value is not a map")
-	}
-
-	announce, exists := decodedMap["announce"]
-	if !exists {
-		t.Fatal("Property 'announce' does not exist")
-	}
-
-	fmt.Println("Tracker URL:", announce)
-
-	info, ok := decodedMap["info"].(map[string]interface{})
-	if !ok {
-		fmt.Println("Property 'info' is not a map")
-		return
-	}
-
-	length, exists := info["length"]
-	if !exists {
-		fmt.Println("Property 'length' does not exist")
-		return
-	}
-
-	fmt.Println("Length:", length)
-
-	// Stop redirecting standard output
-	w.Close()
-	os.Stdout = oldStdout
-
-	// Read the buffer's content
-	var buf bytes.Buffer
-	buf.ReadFrom(r)
-
-	// Check if the output is as expected
-	expectedOutput := "Tracker URL: http://torrent.example.com:6969/announce\nLength: 12345\n"
-	if buf.String() != expectedOutput {
-		t.Errorf("Expected output %q, but got %q", expectedOutput, buf.String())
-	}
-
-}
-
 func TestDecodeEncode(t *testing.T) {
 	tests := []struct {
 		name     string

@@ -34,31 +34,64 @@ func main() {
 	}
 }
 
-func parseDecodedTorrent(decoded interface{}) {
+const (
+	Announce    = "announce"
+	Info        = "info"
+	Length      = "length"
+	PieceLength = "piece length"
+	Pieces      = "pieces"
+)
+
+func parseDecodedTorrent(decoded interface{}) error {
 
 	// Get announce
-	decodedMap, err := utils.AssertType(decoded, "map")
-	handleError(err)
-	fmt.Println("Tracker URL:", decodedMap["announce"])
+	decodedMap, err := utils.AssertMap(decoded)
+	if err != nil {
+		return err
+	}
+
+	announce, err := utils.AssertString(decodedMap[Announce])
+	if err != nil {
+		return err
+	}
+	fmt.Println("Tracker URL:", announce)
 
 	// Get Length
-	info, err := utils.GetMapProperty(decodedMap, "info")
-	handleError(err)
+	info, err := utils.AssertMap(decodedMap[Info])
+	if err != nil {
+		return err
+	}
 
-	infoMap, err := utils.AssertType(info, "map")
-	handleError(err)
-
-	length, err := utils.GetMapProperty(infoMap, "length")
-	handleError(err)
+	length, err := utils.AssertInt(info[Length])
+	if err != nil {
+		return err
+	}
 	fmt.Println("Length:", length)
 
 	// Get Info
 	infoBencode, err := encode.Bencode(info)
-	handleError(err)
+	if err != nil {
+		return err
+	}
 
 	infoHash := utils.EncodeToStringSha1(infoBencode)
 	fmt.Println("Info Hash:", infoHash)
 
+	// Get Piece Length
+	pieceLength, err := utils.AssertInt(info[PieceLength])
+	if err != nil {
+		return err
+	}
+	fmt.Println("Piece Length:", pieceLength)
+
+	// Get Pieces
+	pieces, err := utils.AssertString(info[Pieces])
+	if err != nil {
+		return err
+	}
+	fmt.Println("Pieces:", pieces)
+
+	return nil
 }
 
 func handleError(err error) {
