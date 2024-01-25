@@ -5,20 +5,20 @@ import (
 	"unicode"
 )
 
-func IsInteger(str string, i int) bool {
-	return str[i] == 'i'
+func IsInteger(str string) bool {
+	return []rune(str)[0] == 'i'
 }
 
-func IsString(str string, i int) bool {
-	return unicode.IsDigit(rune(str[i]))
+func IsString(str string) bool {
+	return unicode.IsDigit([]rune(str)[0])
 }
 
-func IsList(str string, i int) bool {
-	return str[i] == 'l'
+func IsList(str string) bool {
+	return []rune(str)[0] == 'l'
 }
 
-func IsDict(str string, i int) bool {
-	return str[i] == 'd'
+func IsDict(str string) bool {
+	return []rune(str)[0] == 'd'
 }
 
 func parseIntegerFromChars(str string, start int) (int, int, error) {
@@ -38,8 +38,8 @@ func parseIntegerFromChars(str string, start int) (int, int, error) {
 	return num, endDigitPos, nil
 }
 
-func ParseInteger(str string, i int) (int, int, error) {
-	number, nextCharPos, err := parseIntegerFromChars(str, i)
+func ParseInteger(str string) (int, int, error) {
+	number, nextCharPos, err := parseIntegerFromChars(str, 1)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -47,8 +47,8 @@ func ParseInteger(str string, i int) (int, int, error) {
 	return number, nextCharPos + 1, nil
 }
 
-func ParseString(str string, i int) (string, int, error) {
-	stringLength, nextCharPos, err := parseIntegerFromChars(str, i)
+func ParseString(str string) (string, int, error) {
+	stringLength, nextCharPos, err := parseIntegerFromChars(str, 0)
 	if err != nil {
 		return "", 0, err
 	}

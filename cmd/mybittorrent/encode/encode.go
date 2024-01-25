@@ -2,18 +2,27 @@ package encode
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 func Bencode(value interface{}) (string, error) {
-
 	switch v := value.(type) {
+	case int:
+		val := bencodeInteger(v)
+		return val, nil
+	case string:
+		val := bencodeString(v)
+		return val, nil
 	case map[string]interface{}:
 		val, err := bencodeDict(v)
 		if err != nil {
 			return "", err
 		}
+		return val, nil
+	case []interface{}:
+		val := bencodeList(v)
 		return val, nil
 	}
 
@@ -46,24 +55,37 @@ func bencodeList(list []interface{}) string {
 }
 
 func bencodeDict(dict map[string]interface{}) (string, error) {
-	parts := []string{}
+	keys := make([]string, 0, len(dict))
+	for key := range dict {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
 
-	for k, v := range dict {
-		key := bencodeString(k)
-		parts = append(parts, key)
+	parts := make([]string, 0, len(keys)*2)
+	for _, key := range keys {
+		value, ok := dict[key]
+		if !ok {
+			return "", fmt.Errorf("invalid dict: key %s not found", key)
+		}
 
-		switch v := v.(type) {
-		case string:
-			val := bencodeString(v)
-			parts = append(parts, val)
+		// encode key
+		keyEncoded := bencodeString(key)
+		parts = append(parts, keyEncoded)
+
+		// encode value
+		switch v := value.(type) {
 		case int:
-			val := bencodeInteger(v)
-			parts = append(parts, val)
-		case []interface{}:
-			val := bencodeList(v)
-			parts = append(parts, val)
+			parts = append(parts, bencodeInteger(v))
+		case map[string]interface{}:
+			data, err := bencodeDict(v)
+			if err != nil {
+				return "", err
+			}
+			parts = append(parts, data)
+		case string:
+			parts = append(parts, bencodeString(v))
 		default:
-			return "", fmt.Errorf("unsupported type: %T", v)
+			return "", fmt.Errorf("unsupported value type: %T", v)
 		}
 	}
 

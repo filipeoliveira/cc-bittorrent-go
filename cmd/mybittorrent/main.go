@@ -28,7 +28,6 @@ func main() {
 		handleError(err)
 
 		parseDecodedTorrent(decoded)
-
 	} else {
 		fmt.Println("Unknown command: " + command)
 		os.Exit(1)
@@ -37,13 +36,11 @@ func main() {
 
 func parseDecodedTorrent(decoded interface{}) {
 
-	//
 	// Get announce
 	decodedMap, err := utils.AssertType(decoded, "map")
 	handleError(err)
 	fmt.Println("Tracker URL:", decodedMap["announce"])
 
-	//
 	// Get Length
 	info, err := utils.GetMapProperty(decodedMap, "info")
 	handleError(err)
@@ -55,14 +52,12 @@ func parseDecodedTorrent(decoded interface{}) {
 	handleError(err)
 	fmt.Println("Length:", length)
 
-	//
 	// Get Info
 	infoBencode, err := encode.Bencode(info)
 	handleError(err)
 
 	infoHash := utils.EncodeToStringSha1(infoBencode)
 	fmt.Println("Info Hash:", infoHash)
-	fmt.Println()
 
 }
 

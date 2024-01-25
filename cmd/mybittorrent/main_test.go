@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/codecrafters-io/bittorrent-starter-go/cmd/mybittorrent/decode"
+	"github.com/codecrafters-io/bittorrent-starter-go/cmd/mybittorrent/encode"
 )
 
 func TestDecode(t *testing.T) {
@@ -25,7 +26,7 @@ func TestDecode(t *testing.T) {
 		{"l6:bananai335ee", []interface{}{"banana", 335}},
 		{"d3:foo3:bar5:helloi52ee", map[string]interface{}{"foo": "bar", "hello": 52}},
 		{"de", map[string]interface{}{}},
-		{"di44e3:bar5:helloi52ee", map[string]interface{}{"44": "bar", "hello": 52}},
+		{"d2:443:bar5:helloi52ee", map[string]interface{}{"44": "bar", "hello": 52}},
 		{
 			"d8:announce40:http://torrent.example.com:6969/announce4:infod6:lengthi12345e4:name8:file.txtee",
 			map[string]interface{}{
@@ -103,4 +104,41 @@ func TestPrintTrackerURL(t *testing.T) {
 		t.Errorf("Expected output %q, but got %q", expectedOutput, buf.String())
 	}
 
+}
+
+func TestDecodeEncode(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Test 1",
+			input:    "d8:announce40:http://torrent.example.com:6969/announce4:infod6:lengthi12345e4:name8:file.txtee",
+			expected: "d8:announce40:http://torrent.example.com:6969/announce4:infod6:lengthi12345e4:name8:file.txtee",
+		},
+		{
+			name:     "Test 2",
+			input:    "llee",
+			expected: "le",
+		},
+		{
+			name:     "Test 3",
+			input:    "d2:443:bar5:helloi52ee",
+			expected: "d2:443:bar5:helloi52ee",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Replace DecodeEncode with the actual function you want to test
+
+			decodeOutput, _, _ := decode.Debencode(tt.input)
+			output, _ := encode.Bencode(decodeOutput)
+
+			if !reflect.DeepEqual(output, tt.expected) {
+				t.Errorf("got %v, want %v", output, tt.expected)
+			}
+		})
+	}
 }
